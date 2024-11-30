@@ -1,82 +1,51 @@
-// import { useRef } from "react";
+import { useRef, useState } from "react";
+import "./index.css";
 
-// export function SignIn() {
-//   const emailRef = useRef(null);
-//   const passwordRef = useRef(null);
-
-//   const togglePopup = () => {
-//     var popup1 = document.getElementById("popup-1");
-//     var popup2 = document.getElementById("popup-2");
-
-//     popup1.classList.toggle("active");
-//     if (popup2.classList.contains("active")) {
-//         popup2.classList.remove("active");
-//     }
-//   }
-
-//   const signUpHandler = (event) => {
-//     event.preventDefault();
-
-//     var formValuesObject = {
-//       email: emailRef.current.value,
-//       password: passwordRef.current.value,
-//     };
-
-//     console.log("The event is: ", event);
-//     console.log("The form values are  is: ", formValuesObject);
-
-//     if (
-//       formValuesObject.email &&
-//       formValuesObject.password
-//     ) {
-//       console.log("Submit this form");
-//       // fetch("localhost:8080/signup")
-//       // Make an api/web service call to submit the user details
-//     } else {
-//       alert("Form is invalid");
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div id="popup-1" className="popup" style={{display: "block"}}>
-//         <div className="content">
-//           <div className="close-btn" onClick={togglePopup}>x</div>
-//           <p className="log1">Log In to <span style={{fontWeight: "bold", color: "#178F7A"}}>Recipe Realm</span></p>
-//           <form onSubmit={signUpHandler}>
-//             <div className="input-field"><input id="loginEmail" placeholder="Email" className="validate" type="email"/></div>
-//             <div className="input-field"><input id="loginPassword" type="password" placeholder="Password" className="validate"/></div>
-//           </form>
-//           <button className="second-button" onclick={togglePopup}>Log In</button>
-//           <p>Don't have an account? <a onClick={togglePopup}><span
-//                 style={{color: "blue", cursor: "pointer", textDecoration: "underline"}}>Register</span></a></p>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
-import { useRef } from "react";
-
-export function SignIn({ togglePopup, toggleRegisterPopup }) {
+export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
+  const [loginError, setLoginError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);  // Track form submission state
 
-  const signUpHandler = (event) => {
+  const signInHandler = (event) => {
     event.preventDefault();
+    setIsSubmitting(true);  // Set submitting state to true
 
     const formValuesObject = {
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
+      email: emailRef.current.value.trim(),
+      password: passwordRef.current.value.trim(),
     };
 
-    console.log("Form values:", formValues);
+    console.log("Form values:", formValuesObject);
 
+    // Validate that the fields are not empty
     if (formValuesObject.email && formValuesObject.password) {
-      console.log("Form is valid. Submit this form.");
+      // Get the list of users from localStorage
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Check if the user exists and the password matches
+      const user = users.find(
+        (user) => user.email === formValuesObject.email && user.password === formValuesObject.password
+      );
+
+      if (user) {
+        console.log("Login successful!");
+        setLoginError(false);
+        // Store the logged-in user in localStorage
+        localStorage.setItem("loggedInUser", JSON.stringify(user));  
+        alert("Login successful!");  // Displaying success alert
+        onLoginSuccess(); // Notify the parent component (Header) about successful login
+        togglePopup(); // Close the login popup
+      } else {
+        setLoginError(true);
+        console.log("Login failed: Invalid credentials.");
+      }
     } else {
       alert("Please fill out all fields.");
+      setLoginError(true);
     }
+
+    setIsSubmitting(false);  // Reset submitting state after completion
   };
 
   return (
@@ -90,7 +59,7 @@ export function SignIn({ togglePopup, toggleRegisterPopup }) {
           Log In to{" "}
           <span style={{ fontWeight: "bold", color: "#178F7A" }}>Recipe Realm</span>
         </p>
-        <form onSubmit={signUpHandler}>
+        <form onSubmit={signInHandler}>
           <div className="input-field">
             <input
               ref={emailRef}
@@ -98,6 +67,7 @@ export function SignIn({ togglePopup, toggleRegisterPopup }) {
               placeholder="Email"
               className="validate"
               type="email"
+              required
             />
           </div>
           <div className="input-field">
@@ -107,12 +77,22 @@ export function SignIn({ togglePopup, toggleRegisterPopup }) {
               type="password"
               placeholder="Password"
               className="validate"
+              required
             />
           </div>
-          <button type="submit" className="second-button">
-            Log In
+          <button 
+            type="submit" 
+            className="second-button" 
+            disabled={isSubmitting} // Disable the button when submitting
+          >
+            {isSubmitting ? "Logging In..." : "Log In"} {/* Button text change during submission */}
           </button>
         </form>
+        {loginError && (
+          <p style={{ color: "red", fontSize: "14px", marginTop: "10px" }}>
+            Invalid email or password. Please try again.
+          </p>
+        )}
         <p>
           Don't have an account?{" "}
           <span
@@ -133,3 +113,4 @@ export function SignIn({ togglePopup, toggleRegisterPopup }) {
     </div>
   );
 }
+
