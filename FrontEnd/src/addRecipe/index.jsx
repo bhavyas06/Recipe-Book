@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import "./index.css";
 
 const AddRecipe = () => {
+    const [recipeName, setRecipeName] = useState(null);
+    const [prepTime, setPrepTime] = useState(null);
+    const [cookTime, setCookTime] = useState(null);
+    const [servings, setServings] = useState(null);
+    const [description, setDescription] = useState(null);
+
     const [ingredients, setIngredients] = useState(
         Array.from({ length: 5 }, (_, index) => ({
             id: Date.now() + index,
@@ -94,19 +100,24 @@ const AddRecipe = () => {
             !formattedSteps.length ||
             !coverImage || !recipeImage ||
             !selectedTags.length ||
-            !loggedInUser
+            !loggedInUser || !recipeName || 
+            !description || !prepTime || !cookTime
         ) {
             alert("Please fill out all fields, select tags, upload an image, and make sure you're logged in!");
             return;
         }
 
         const recipe = {
+            user: loggedInUser.email,
+            recipeName: recipeName,
             cI: coverImage,
             rI: recipeImage,
+            prepTime,
+            cookTime,
+            description,
             ingredients: formattedIngredients,
             steps: formattedSteps,
             tags: selectedTags,
-            user: loggedInUser.email,
         };
 
         console.log("Submitting Recipe:", recipe);
@@ -127,6 +138,12 @@ const AddRecipe = () => {
         alert("Recipe saved successfully!");
 
         // Clear the form after saving
+
+        setRecipeName("");
+        setPrepTime("");
+        setCookTime("");
+        setServings("");
+        setDescription("");
         setIngredients(
             Array.from({ length: 5 }, (_, index) => ({
                 id: Date.now() + index,
