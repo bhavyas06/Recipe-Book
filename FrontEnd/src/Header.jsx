@@ -1,73 +1,132 @@
 import { Link } from "react-router-dom";
-import { Button } from "./components/elements/button";
-import { RecipeBox } from "./components/elements/RecipeBox";
+import { useState, useEffect } from "react";
 
-export function Header() {
+export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearch, setIsSearch] = useState(false);
+
+  // Toggle menu visibility
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleSearch = () => {
+    setIsSearch(!isSearch);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser"); // Clear the logged-in user from localStorage
+    setIsLoggedIn(false); // Update login state in parent component (Layout)
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setIsMenuOpen(false); // Close the menu
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
-      <section id="header">
-
-      <Link to={"/"}><img src="images/Logo1.png" class="logo"/></Link>
-
-      <div style={{marginTop: "14px"}}>
-        <ul id="navbar">
-          <li><a href="Recipes.html">Recipes</a></li>
-          <li><a href="Blog.html">Contact Us</a></li>
-          <li><a href="AboutUs.html">About</a></li>
-
-          <li id="searchContainer">
-            <form id="searchForm" autocomplete="off">
-              <input type="text" id="searchInput" placeholder="Search..." />
-              <button type="submit" id="searchButton">
-                <i class="fa-solid fa-search"></i>
-              </button>
-              <div id="searchResults" class="hidden"></div>
-            </form>
-          </li>
-
-          
-
-          <div class="popup" id="popup-2">
-            <div class="content" style={{height: "600px", top: "400px"}}>
-              <div class="close-btn" onclick="togglePopup1()">x</div>
-
-              <p class="log1">Create Your <span style={{fontWeight: "bold", color: "#178F7A"}}>Recipe Realm</span> Account</p>
-              <div class="input-field"><input id="registerName" placeholder="Name" class="validate"/></div>
-              <div class="input-field"><input id="registerPhoneNumber" placeholder="Phone Number" class="validate"/></div>
-              <div class="input-field"><input id="registerEmail" placeholder="Email" class="validate" type="email" required/></div>
-              <div class="input-field"><input id="registerPassword" placeholder="Password" class="validate"/></div>
-              <button class="second-button" onclick="register()">Register</button>
-              <p>Already have an account? <a onclick="togglePopup()"><span
-                    style={{color: "blue", cursor: "pointer", textDecoration: "underline"}}>Login</span></a></p>
-            </div>
+      <div className="he">
+        <header>
+          <div className="logo-container">
+            <Link to="/">
+              <img src="images/Logo1.png" alt="Logo" className="logo" />
+            </Link>
           </div>
 
-          <li><a onclick="togglePopup()" id="loginBtn" style={{marginLeft:"-30px", cursor: "pointer"}}>Login</a></li>
-          <button id="logoutButton" style={{display: "none"}} onclick="logout()" class="logout">Logout</button>
+          {/* Hamburger Icon */}
+          <div className="search-button1">
+            <form id="searchForm1">
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search..."
+                className={`search-input ${isSearch ? "open1" : ""}`}
+              />
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleSearch();
+                }}
+                type="submit"
+                className="search-button"
+              >
+                <i className="fa-solid fa-search"></i>
+              </button>
+            </form>
+          </div>
+          <div className="hamburger-icon" onClick={toggleMenu}>
+            <div className={isMenuOpen ? "bar open" : "bar"}></div>
+            <div className={isMenuOpen ? "bar open" : "bar"}></div>
+            <div className={isMenuOpen ? "bar open" : "bar"}></div>
+          </div>
 
-          <li><a href="AddARecipe.html" style={{marginLeft:"-30px;"}}>Your Recipes</a></li>
-        </ul>
+          {/* Navbar */}
+          <nav className={`navbar ${isMenuOpen ? "open" : ""}`}>
+            <ul>
+              <li onClick={() => isMenuOpen && toggleMenu()}>
+                <Link to="/recipes">Recipe</Link>
+              </li>
+              <li onClick={() => isMenuOpen && toggleMenu()}>
+                <Link to="/aboutUs">About</Link>
+              </li>
+              <li onClick={() => isMenuOpen && toggleMenu()}>
+                <Link to="/contactUs">Contact Us</Link>
+              </li>
+              <li>
+                <form id="searchForm">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search..."
+                    className="search-input"
+                  />
+                  <button type="submit" className="search-button">
+                    <i className="fa-solid fa-search"></i>
+                  </button>
+                </form>
+              </li>
+
+              {/* Conditionally render Login/Profile button */}
+              {isLoggedIn ? (
+                <>
+                  <li onClick={() => isMenuOpen && toggleMenu()}>
+                    <Link to="/profile">Profile</Link>
+                  </li>
+                  <li onClick={() => isMenuOpen && toggleMenu()}>
+                    <button onClick={handleLogout} className="logout-button">
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li onClick={() => isMenuOpen && toggleMenu()}>
+                  <a href="#" className="login-button" onClick={togglePopup}>
+                    Login
+                  </a>
+                </li>
+              )}
+
+              <li onClick={() => isMenuOpen && toggleMenu()}>
+                <Link to="/addRecipe">Add Recipe</Link>
+              </li>
+            </ul>
+          </nav>
+        </header>
+
+        <section id="below-header">
+          <div className="ideas">
+            <p style={{ marginTop: "-18px" }}>COOK | COLLECT | CREATE</p>
+          </div>
+        </section>
       </div>
-      </section>
-
-    <section id="below-header">
-      <div class="ideas">
-        <p style={{marginTop:"-18px"}}>COOK | COLLECT | CREATE</p>
-      </div>
-    </section>
-
-    <section id="gap">
-    <div style={{height:"20px", backgroundColor: "rgb(232, 232, 232)"}}>
-    </div>
-  </section>
-
-    <section id="today-topic">
-      <h1>Today's Inspiration</h1>
-        <div className="cat3">
-          <RecipeBox image="images/mmm.webp" title="Matar Malai Methi"/>
-        </div>
-
-    </section>
-  </>
-    )
+    </>
+  );
 }
