@@ -1,17 +1,17 @@
 /* Popup container */
 .popup .content {
     position: absolute;
-    top: 120px;
+    top: 60px; /* Adjust this value to ensure it's below the header */
     left: 50%;
-    width: 90%;
-    max-width: 400px; 
-    transform: translateX(-50%);
+    width: 90%; /* Ensures the popup doesn't occupy the full screen */
+    max-width: 400px; /* Maximum width for large screens */
+    transform: translateX(-50%); /* Centers the popup horizontally */
     padding: 20px;
     border-radius: 10px;
     background: white;
     z-index: 2;
     text-align: center;
-    height: auto; 
+    height: auto; /* Height should adjust based on content */
 }
 
 /* Close button */
@@ -38,7 +38,6 @@
 .log1 {
     color: black;
     font-size: 22px;
-    margin-bottom: 20px;
 }
 
 /* Input fields */
@@ -50,7 +49,7 @@
     margin-bottom: 15px;
     color: black;
     background: white;
-    width: 80%; 
+    width: 80%; /* Ensure the input fields are responsive */
     box-sizing: border-box;
 }
 
@@ -59,7 +58,6 @@
     color: white;
     font-size: 18px;
     font-weight: 500;
-    margin-top: 20px;
     padding: 15px 30px;
     border-radius: 40px;
     border: none;
@@ -67,6 +65,7 @@
     background-color: #178F7A;
     outline: none;
     cursor: pointer;
+    margin-top: -50px;
 }
 
 /* Active button state */
@@ -76,12 +75,13 @@
     outline: none;
 }
 
-/* Media queries */
+/* Media queries for responsive design */
 @media (max-width: 769px) {
+    /* Popup adjustments for smaller screens */
     .popup .content {
-        width: 90%; 
+        width: 90%;
         padding: 15px;
-        top: 50px;
+        top: 36px; /* Further adjusted for smaller screens */
     }
 
     .log1 {
@@ -91,7 +91,7 @@
     .input-field .validate {
         font-size: 16px;
         padding: 15px;
-        width: 100%; 
+        width: 100%; /* Inputs should take the full width */
     }
 
     .second-button {
@@ -101,11 +101,13 @@
     }
 }
 
+/* For very small screens */
 @media (max-width: 480px) {
     .popup .content {
-        width: 95%;
+        width: 95%; /* Make sure it fits smaller screens */
         padding: 10px;
         top: 50px;
+         /* Leave some space from the header on very small screens */
     }
 
     .log1 {
@@ -124,6 +126,7 @@
     }
 }
 
+/* Paragraph under the registration form */
 p {
     color: black;
     padding: 20px;
