@@ -5,53 +5,58 @@ export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const [loginError, setLoginError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);  // Track form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const signInHandler = (event) => {
+  const handleInputChange = () => setLoginError(false);
+
+  const signInHandler = async (event) => {
     event.preventDefault();
-    setIsSubmitting(true);  // Set submitting state to true
+    setIsSubmitting(true);
 
     const formValuesObject = {
       email: emailRef.current.value.trim(),
       password: passwordRef.current.value.trim(),
     };
 
-    console.log("Form values:", formValuesObject);
-
-    // Validate that the fields are not empty
+    // Validate that fields are not empty
     if (formValuesObject.email && formValuesObject.password) {
-      // Get the list of users from localStorage
-      const users = JSON.parse(localStorage.getItem("users")) || [];
+      try {
+        const response = await fetch("http://localhost:5174/users");
+        const users = await response.json();
 
-      // Check if the user exists and the password matches
-      const user = users.find(
-        (user) => user.email === formValuesObject.email && user.password === formValuesObject.password
-      );
+        // Find the user with matching credentials
+        const user = users.find(
+          (user) =>
+            user.email === formValuesObject.email &&
+            user.password === formValuesObject.password
+        );
 
-      if (user) {
-        console.log("Login successful!");
-        setLoginError(false);
-        // Store the logged-in user in localStorage
-        localStorage.setItem("loggedInUser", JSON.stringify(user));  
-        alert("Login successful!");  // Displaying success alert
-        onLoginSuccess(); // Notify the parent component (Header) about successful login
-        togglePopup(); // Close the login popup
-      } else {
+        if (user) {
+          console.log("Login successful!");
+          setLoginError(false);
+          localStorage.setItem("loggedInUser", JSON.stringify(user));
+          localStorage.setItem("isLoggedIn", "true");
+          onLoginSuccess();
+          togglePopup();
+        } else {
+          setLoginError(true);
+          console.log("Login failed: Invalid credentials.");
+        }
+      } catch (error) {
         setLoginError(true);
-        console.log("Login failed: Invalid credentials.");
+        console.log("Error fetching users:", error);
       }
     } else {
       alert("Please fill out all fields.");
       setLoginError(true);
     }
 
-    setIsSubmitting(false);  // Reset submitting state after completion
+    setIsSubmitting(false);
   };
 
   return (
     <div id="popup-1" className="popup active">
       <div className="content">
-        {/* Corrected onClick for the close button */}
         <div className="close-btn" onClick={togglePopup} style={{ cursor: "pointer" }}>
           x
         </div>
@@ -68,6 +73,7 @@ export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
               className="validate"
               type="email"
               required
+              onChange={handleInputChange}
             />
           </div>
           <div className="input-field">
@@ -78,18 +84,22 @@ export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
               placeholder="Password"
               className="validate"
               required
+              onChange={handleInputChange}
             />
           </div>
-          <button 
-            type="submit" 
-            className="second-button" 
-            disabled={isSubmitting} // Disable the button when submitting
+          <button
+            type="submit"
+            className="second-button"
+            disabled={isSubmitting}
           >
-            {isSubmitting ? "Logging In..." : "Log In"} {/* Button text change during submission */}
+            {isSubmitting ? "Logging In..." : "Log In"}
           </button>
         </form>
         {loginError && (
-          <p style={{ color: "red", fontSize: "14px", marginTop: "10px" }}>
+          <p
+            style={{ color: "red", fontSize: "14px", marginTop: "10px" }}
+            aria-live="polite"
+          >
             Invalid email or password. Please try again.
           </p>
         )}
@@ -113,4 +123,3 @@ export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
     </div>
   );
 }
-
