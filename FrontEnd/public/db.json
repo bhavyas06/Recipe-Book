@@ -1,6 +1,19 @@
 {
   "users": [
-    
+    {
+      "id": "1734936607444",
+      "name": "Daniel",
+      "phone": "9988998899",
+      "email": "daniel@test.com",
+      "password": "daniel"
+    },
+    {
+      "id": "1734960277131",
+      "name": "Tester",
+      "phone": "9977997799",
+      "email": "bhu@gmail.com",
+      "password": "bhu"
+    }
   ],
   "recipes": [
   ]
