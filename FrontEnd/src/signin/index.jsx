@@ -21,7 +21,7 @@ export function SignIn({ togglePopup, toggleRegisterPopup, onLoginSuccess }) {
     // Validate that fields are not empty
     if (formValuesObject.email && formValuesObject.password) {
       try {
-        const response = await fetch("http://localhost:5174/users");
+        const response = await fetch("http://localhost:8080/users");
         const users = await response.json();
 
         // Find the user with matching credentials

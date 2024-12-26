@@ -12,7 +12,7 @@ export function RecipeInnerPage() {
     const fetchRecipeById = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5174/recipes/${recipeId}`);
+        const response = await fetch(`http://localhost:8080/recipes/${recipeId}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch recipe: ${response.status}`);
         }

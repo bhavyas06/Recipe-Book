@@ -17,7 +17,7 @@ export function ProfilePage() {
     const fetchUserRecipes = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5174/recipes/user/${loggedInUser.email}`
+          `http://localhost:8080/recipes/user/${loggedInUser.email}`
         );
 
         if (!response.ok) {
@@ -45,7 +45,7 @@ export function ProfilePage() {
   const handleDelete = async (recipeId) => {
     if (window.confirm("Are you sure you want to delete this recipe?")) {
       try {
-        const response = await fetch(`http://localhost:5174/recipes/${recipeId}`, {
+        const response = await fetch(`http://localhost:8080/recipes/${recipeId}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
         });

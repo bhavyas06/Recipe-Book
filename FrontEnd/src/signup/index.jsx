@@ -30,7 +30,7 @@ export function SignUp({ togglePopup, toggleRegisterPopup }) {
       formValuesObject.password
     ) {
       try {
-        const response = await fetch("http://localhost:5174/users");
+        const response = await fetch("http://localhost:8080/users");
         const users = await response.json();
         const userExists = users.some((user) => user.email === formValuesObject.email);
 
@@ -44,7 +44,7 @@ export function SignUp({ togglePopup, toggleRegisterPopup }) {
             id: Date.now().toString(),
           };
 
-          const postResponse = await fetch("http://localhost:5174/users", {
+          const postResponse = await fetch("http://localhost:8080/users", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
