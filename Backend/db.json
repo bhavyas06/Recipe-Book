@@ -6,6 +6,140 @@
       "phone": "9988998899",
       "email": "daniel@test.com",
       "password": "daniel"
+    },
+    {
+      "id": "1734960277131",
+      "name": "Tester",
+      "phone": "9977997799",
+      "email": "bhu@gmail.com",
+      "password": "bhu"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "1735017573456",
+      "user": "bhu@gmail.com",
+      "recipeName": "Bread Pakora",
+      "prepTime": "10 minutes",
+      "cookTime": "20 minutes",
+      "servings": "6",
+      "description": "This bread pakora recipe serves as a classic start to your day.",
+      "coverImage": "/images/BreadPakora.cms",
+      "recipeImage": "/images/BreadPakora.cms",
+      "ingredients": [
+        {
+          "id": 1735017366172,
+          "value": "6 bread slices"
+        },
+        {
+          "id": 1735017366173,
+          "value": "3/4 cup besan"
+        },
+        {
+          "id": 1735017366174,
+          "value": "1 tbsp rice flour"
+        },
+        {
+          "id": 1735017366175,
+          "value": "1/2 tsp cumin seeds"
+        },
+        {
+          "id": 1735017366176,
+          "value": "1/4 tsp hing"
+        },
+        {
+          "id": 1735017463225,
+          "value": "1 tsp finely chopped green chillies"
+        },
+        {
+          "id": 1735017464094,
+          "value": "1/2 tsp chilli powder"
+        },
+        {
+          "id": 1735017465006,
+          "value": "1/4 tsp haldi"
+        },
+        {
+          "id": 1735017466109,
+          "value": "1/4 cup finely chopped coriander"
+        },
+        {
+          "id": 1735017482736,
+          "value": "Oil for deep frying"
+        }
+      ],
+      "steps": [
+        {
+          "id": 1735017366177,
+          "value": "Cut each bread slice into 4 equal pieces."
+        },
+        {
+          "id": 1735017366178,
+          "value": "Combine all ingredients, except the bread and coriander in a deep bowl along with 3/4 cup of water and whisk well."
+        },
+        {
+          "id": 1735017366179,
+          "value": "Add the coriander and mix well."
+        },
+        {
+          "id": 1735017366180,
+          "value": "Heat the oil in a deep non-stick pan, dip one bread piece at a time in the batter and deep fry on a medium flame till it turns crisp and golden brown from both sides."
+        },
+        {
+          "id": 1735017366181,
+          "value": "Serve bread pakora immediately with tomato ketchup and green chutney."
+        }
+      ],
+      "tags": [
+        "breakfast",
+        "snacks"
+      ]
+    },
+    {
+      "id": "1734876245106",
+      "user": "bhu@gmail.com",
+      "recipeName": "Banana Smoothie",
+      "prepTime": "2 minutes",
+      "cookTime": "3 minutes",
+      "servings": "1",
+      "description": "This smoothie is the combination of all three crucial elements: filling, nutritious, and easy.",
+      "coverImage": "/images/Banana.webp",
+      "recipeImage": "/images/Banana.webp",
+      "ingredients": [
+        {
+          "id": 1734876028032,
+          "value": "1 banana, sliced, frozen"
+        },
+        {
+          "id": 1734876028033,
+          "value": "2 pitted dates"
+        },
+        {
+          "id": 1734876028034,
+          "value": "2 tablespoons almond butter"
+        },
+        {
+          "id": 1734876028035,
+          "value": "1/4th cup milk, more as needed"
+        }
+      ],
+      "steps": [
+        {
+          "id": 1734876028037,
+          "value": "Place banana, dates, almond butter, and oat milk in a blender and blend until smooth."
+        },
+        {
+          "id": 1734876028038,
+          "value": "Add more oat milk as needed, a splash at a time, until smoothie thins out to the desired consistency."
+        },
+        {
+          "id": 1734876028039,
+          "value": "Pour smoothie into a glass and serve immediately."
+        }
+      ],
+      "tags": [
+        "breakfast"
+      ]
     }
   ]
 }
