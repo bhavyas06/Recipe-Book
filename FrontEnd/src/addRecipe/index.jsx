@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./index.css";
 
 const AddRecipe = () => {
+    const {state} = useLocation();
+    const {recipe, isEdit} = state || {};
+    const navigate = useNavigate();
+
     const [recipeName, setRecipeName] = useState("");
     const [prepTime, setPrepTime] = useState("");
     const [cookTime, setCookTime] = useState("");
@@ -34,6 +39,27 @@ const AddRecipe = () => {
     const [coverImage, setCoverImage] = useState(null);
     const [recipeImage, setRecipeImage] = useState(null);
 
+    useEffect(() => {
+        if (isEdit && recipe) {
+            setRecipeName(recipe.recipeName || "");
+            setPrepTime(recipe.prepTime || "");
+            setCookTime(recipe.cookTime || "");
+            setServings(recipe.servings || "");
+            setDescription(recipe.description || "");
+            setIngredients(recipe.ingredients || []);
+            setSteps(recipe.steps || []);
+            setTags((prevTags) => {
+                const updatedTags = { ...prevTags };
+                recipe.tags.forEach((tag) => {
+                    updatedTags[tag] = true;
+                });
+                return updatedTags;
+            });
+            setCoverImage(recipe.coverImage || null);
+            setRecipeImage(recipe.recipeImage || null);
+        }
+    }, [isEdit, recipe]);
+
     const removeImage = (setImage, inputId) => {
         setImage(null);
         const input = document.getElementById(inputId);
@@ -44,7 +70,8 @@ const AddRecipe = () => {
     const handleImageChange = (e, setImage) => {
         const file = e.target.files[0];
         if (file) {
-            setImage(URL.createObjectURL(file));
+            const imagePath = `/images/${file.name}`;
+            setImage(imagePath);
         }
     };
 
@@ -76,77 +103,82 @@ const AddRecipe = () => {
         setTags((prev) => ({ ...prev, [tag]: !prev[tag] }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const formattedIngredients = ingredients
-            .map((item) => item.value.trim())
-            .filter(Boolean);
-        const formattedSteps = steps
-            .map((item) => item.value.trim())
-            .filter(Boolean);
-        const selectedTags = Object.keys(tags).filter((tag) => tags[tag]);
-
         const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+        console.log(loggedInUser);
+
+        const selectedTags = Object.keys(tags).filter((tag) => tags[tag]);
+        const formattedIngredients = ingredients.filter(Boolean);
+        const formattedSteps = steps.filter(Boolean);
 
         if (
-            !formattedIngredients.length ||
-            !formattedSteps.length ||
-            !coverImage ||
-            !recipeImage ||
-            !selectedTags.length ||
             !loggedInUser ||
             !recipeName ||
-            !description ||
             !prepTime ||
             !cookTime ||
-            !servings
+            !servings ||
+            !description ||
+            !coverImage ||
+            !recipeImage ||
+            !formattedIngredients.length ||
+            !formattedSteps.length ||
+            !selectedTags.length
         ) {
-            alert("Please fill out all fields, select tags, upload an image, and make sure you're logged in!");
+            alert("Please fill out all fields, select tags, and upload images!");
             return;
         }
 
-        const recipe = {
-            id: Date.now().toString(),
+        const newRecipe = {
+            id: isEdit ? recipe.id : Date.now().toString(),
             user: loggedInUser.email,
             recipeName,
-            coverImage,
-            recipeImage,
             prepTime,
             cookTime,
-            description,
             servings,
+            description,
+            coverImage,
+            recipeImage,
             ingredients: formattedIngredients,
             steps: formattedSteps,
             tags: selectedTags,
         };
 
-        const existingRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
-        existingRecipes.push(recipe);
+        console.log(newRecipe);
 
-        localStorage.setItem("recipes", JSON.stringify(existingRecipes));
-        alert("Recipe saved successfully!");
+        const url = isEdit
+        ? `http://localhost:5174/recipes/${recipe.id}`
+        : "http://localhost:5174/recipes";
 
-        // Clear the form after saving
+        try {
+            const response = await fetch(url, {
+                method: isEdit? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newRecipe),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to submit recipe.");
+            }
+
+            alert(isEdit ? "Recipe updated successfully!" : "Recipe added successfully!");
+            if(isEdit) 
+                navigate("/profile");
+            resetForm();
+        } catch (error) {
+            console.error("Error:", error);
+            alert(error.message);
+        }
+    };
+
+    const resetForm = () => {
         setRecipeName("");
         setPrepTime("");
         setCookTime("");
         setServings("");
         setDescription("");
-        setIngredients(
-            Array.from({ length: 5 }, (_, index) => ({
-                id: Date.now() + index,
-                value: "",
-            }))
-        );
-        setSteps(
-            Array.from({ length: 5 }, (_, index) => ({
-                id: Date.now() + index + 5,
-                value: "",
-            }))
-        );
-        setCoverImage(null);
-        setRecipeImage(null);
+        setIngredients(Array(5).fill(""));
+        setSteps(Array(5).fill(""));
         setTags({
             breakfast: false,
             dinner: false,
@@ -157,13 +189,16 @@ const AddRecipe = () => {
             dessert: false,
             italian: false,
         });
+        setCoverImage(null);
+        setRecipeImage(null);
     };
+    
+    
 
     return (
         <form className="add-recipe-form" onSubmit={handleSubmit} autoComplete="off">
-            <h2>Add Recipe</h2>
+            <h2>{isEdit ? "Edit Recipe" : "Add Recipe"}</h2>
 
-            {/* Recipe Name */}
             <div className="name">
                 <label htmlFor="recipe-name">
                     <h3>Recipe Name:</h3>
@@ -177,7 +212,6 @@ const AddRecipe = () => {
                 />
             </div>
 
-            {/* Cover Image */}
 <div className="image-upload-container">
     <div className="image-upload">
         <label htmlFor="coverImageInput" className="upload-label">
@@ -191,7 +225,7 @@ const AddRecipe = () => {
             type="file"
             id="coverImageInput"
             accept="image/*"
-            onChange={(e) => handleImageChange(e, setCoverImage)} // Trigger image update
+            onChange={(e) => handleImageChange(e, setCoverImage)}
             style={{ display: "none" }}
         />
         {coverImage && (
@@ -200,7 +234,7 @@ const AddRecipe = () => {
                 className="remove-button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    removeImage(setCoverImage, "coverImageInput"); // Reset file input and image preview
+                    removeImage(setCoverImage, "coverImageInput");
                 }}
             >
                 ✕
@@ -208,7 +242,6 @@ const AddRecipe = () => {
         )}
     </div>
 
-{/* Recipe Image */}
     <div className="image-upload">
         <label htmlFor="recipeImageInput" className="upload-label">
             {recipeImage ? (
@@ -221,7 +254,7 @@ const AddRecipe = () => {
             type="file"
             id="recipeImageInput"
             accept="image/*"
-            onChange={(e) => handleImageChange(e, setRecipeImage)} // Trigger image update
+            onChange={(e) => handleImageChange(e, setRecipeImage)}
             style={{ display: "none" }}
         />
         {recipeImage && (
@@ -230,7 +263,7 @@ const AddRecipe = () => {
                 className="remove-button"
                 onClick={(e) => {
                     e.stopPropagation();
-                    removeImage(setRecipeImage, "recipeImageInput"); // Reset file input and image preview
+                    removeImage(setRecipeImage, "recipeImageInput");
                 }}
             >
                 ✕
@@ -240,9 +273,7 @@ const AddRecipe = () => {
 </div>
 
 
-
-            {/* Recipe Details */}
-            <div className="details">
+            <div className="details1">
                 <div className="time">
                     <label htmlFor="prep-time">Prep Time:</label>
                     <input
@@ -284,7 +315,6 @@ const AddRecipe = () => {
                 </div>
             </div>
 
-            {/* Ingredients Section */}
             <div className="recipe-container">
                 <div className="ingredients">
                     <h3>Ingredients</h3>
@@ -313,7 +343,6 @@ const AddRecipe = () => {
                     </button>
                 </div>
 
-                {/* Steps Section */}
                 <div className="steps">
                     <h3>Steps</h3>
                     {steps.map((step) => (
@@ -342,7 +371,6 @@ const AddRecipe = () => {
                 </div>
             </div>
 
-            {/* Tags Section */}
             <div className="tags1">
                 <h3>Tags:</h3>
                 <div className="tag-label">
@@ -359,9 +387,8 @@ const AddRecipe = () => {
                 </div>
             </div>
 
-            {/* Submit Button */}
             <button type="submit" className="submit-button">
-                Submit Recipe
+                {isEdit ? "Save Recipe" : "Submit Recipe"}
             </button>
         </form >
     );
