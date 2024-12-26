@@ -50,3 +50,10 @@
     font-size: 16px;
   }
 }
+
+@media (max-width: 321px) {
+  .hold{
+    max-width: 80%;
+    margin-left: 40px;
+  }
+}
