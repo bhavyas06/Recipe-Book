@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import './Header.css'
 
-export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
+export function Header({ isLoggedIn, togglePopup}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
 
-  // Toggle menu visibility
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -14,16 +14,10 @@ export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
     setIsSearch(!isSearch);
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem("loggedInUser"); // Clear the logged-in user from localStorage
-    setIsLoggedIn(false); // Update login state in parent component (Layout)
-  };
-
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) {
-        setIsMenuOpen(false); // Close the menu
+        setIsMenuOpen(false);
       }
     };
 
@@ -37,7 +31,7 @@ export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
         <header>
           <div className="logo-container">
             <Link to="/">
-              <img src="images/Logo1.png" alt="Logo" className="logo" />
+              <img src="/images/Logo1.png" alt="Logo" className="logo" />
             </Link>
           </div>
 
@@ -68,7 +62,6 @@ export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
             <div className={isMenuOpen ? "bar open" : "bar"}></div>
           </div>
 
-          {/* Navbar */}
           <nav className={`navbar ${isMenuOpen ? "open" : ""}`}>
             <ul>
               <li onClick={() => isMenuOpen && toggleMenu()}>
@@ -94,25 +87,19 @@ export function Header({ isLoggedIn, togglePopup, setIsLoggedIn }) {
                 </form>
               </li>
 
-              {/* Conditionally render Login/Profile button */}
               {isLoggedIn ? (
-                <>
-                  <li onClick={() => isMenuOpen && toggleMenu()}>
-                    <Link to="/profile">Profile</Link>
-                  </li>
-                  <li onClick={() => isMenuOpen && toggleMenu()}>
-                    <button onClick={handleLogout} className="logout-button">
-                      Logout
-                    </button>
-                  </li>
-                </>
-              ) : (
-                <li onClick={() => isMenuOpen && toggleMenu()}>
-                  <a href="#" className="login-button" onClick={togglePopup}>
-                    Login
-                  </a>
-                </li>
-              )}
+          <>
+            <li>
+              <Link to="/profile">Profile</Link>
+            </li>
+          </>
+        ) : (
+          <li>
+            <a href="#" className="login-button" onClick={togglePopup}>
+              Login
+            </a>
+          </li>
+        )}
 
               <li onClick={() => isMenuOpen && toggleMenu()}>
                 <Link to="/addRecipe">Add Recipe</Link>
