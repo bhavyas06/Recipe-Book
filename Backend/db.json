@@ -1,5 +1,11 @@
 {
   "users": [
-    
+    {
+      "id": "1734936607444",
+      "name": "Daniel",
+      "phone": "9988998899",
+      "email": "daniel@test.com",
+      "password": "daniel"
+    }
   ]
 }
