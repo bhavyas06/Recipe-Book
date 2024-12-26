@@ -3,8 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./index.css";
 
 const AddRecipe = () => {
-    const {state} = useLocation();
-    const {recipe, isEdit} = state || {};
+    const { state } = useLocation();
+    const { recipe, isEdit } = state || {};
     const navigate = useNavigate();
 
     const [recipeName, setRecipeName] = useState("");
@@ -63,9 +63,9 @@ const AddRecipe = () => {
     const removeImage = (setImage, inputId) => {
         setImage(null);
         const input = document.getElementById(inputId);
-        input.value = ""; 
+        input.value = "";
     };
-    
+
 
     const handleImageChange = (e, setImage) => {
         const file = e.target.files[0];
@@ -147,12 +147,12 @@ const AddRecipe = () => {
         console.log(newRecipe);
 
         const url = isEdit
-        ? `http://localhost:5174/recipes/${recipe.id}`
-        : "http://localhost:5174/recipes";
+            ? `http://localhost:8080/recipes/${recipe.id}`
+            : "http://localhost:8080/recipes";
 
         try {
             const response = await fetch(url, {
-                method: isEdit? "PUT" : "POST",
+                method: isEdit ? "PUT" : "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newRecipe),
             });
@@ -162,7 +162,7 @@ const AddRecipe = () => {
             }
 
             alert(isEdit ? "Recipe updated successfully!" : "Recipe added successfully!");
-            if(isEdit) 
+            if (isEdit)
                 navigate("/profile");
             resetForm();
         } catch (error) {
@@ -192,8 +192,8 @@ const AddRecipe = () => {
         setCoverImage(null);
         setRecipeImage(null);
     };
-    
-    
+
+
 
     return (
         <form className="add-recipe-form" onSubmit={handleSubmit} autoComplete="off">
@@ -212,66 +212,65 @@ const AddRecipe = () => {
                 />
             </div>
 
-<div className="image-upload-container">
-    <div className="image-upload">
-        <label htmlFor="coverImageInput" className="upload-label">
-            {coverImage ? (
-                <img src={coverImage} alt="Cover" className="uploaded-image" />
-            ) : (
-                <span>Select Cover Image</span>
-            )}
-        </label>
-        <input
-            type="file"
-            id="coverImageInput"
-            accept="image/*"
-            onChange={(e) => handleImageChange(e, setCoverImage)}
-            style={{ display: "none" }}
-        />
-        {coverImage && (
-            <button
-                type="button"
-                className="remove-button"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(setCoverImage, "coverImageInput");
-                }}
-            >
-                ✕
-            </button>
-        )}
-    </div>
+            <div className="image-upload-container">
+                <div className="image-upload">
+                    <label htmlFor="coverImageInput" className="upload-label">
+                        {coverImage ? (
+                            <img src={coverImage} alt="Cover" className="uploaded-image" />
+                        ) : (
+                            <span>Select Cover Image</span>
+                        )}
+                    </label>
+                    <input
+                        type="file"
+                        id="coverImageInput"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, setCoverImage)}
+                        style={{ display: "none" }}
+                    />
+                    {coverImage && (
+                        <button
+                            type="button"
+                            className="remove-button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                removeImage(setCoverImage, "coverImageInput");
+                            }}
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
 
-    <div className="image-upload">
-        <label htmlFor="recipeImageInput" className="upload-label">
-            {recipeImage ? (
-                <img src={recipeImage} alt="Recipe" className="uploaded-image" />
-            ) : (
-                <span>Select Recipe Image</span>
-            )}
-        </label>
-        <input
-            type="file"
-            id="recipeImageInput"
-            accept="image/*"
-            onChange={(e) => handleImageChange(e, setRecipeImage)}
-            style={{ display: "none" }}
-        />
-        {recipeImage && (
-            <button
-                type="button"
-                className="remove-button"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(setRecipeImage, "recipeImageInput");
-                }}
-            >
-                ✕
-            </button>
-        )}
-    </div>
-</div>
-
+                <div className="image-upload">
+                    <label htmlFor="recipeImageInput" className="upload-label">
+                        {recipeImage ? (
+                            <img src={recipeImage} alt="Recipe" className="uploaded-image" />
+                        ) : (
+                            <span>Select Recipe Image</span>
+                        )}
+                    </label>
+                    <input
+                        type="file"
+                        id="recipeImageInput"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, setRecipeImage)}
+                        style={{ display: "none" }}
+                    />
+                    {recipeImage && (
+                        <button
+                            type="button"
+                            className="remove-button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                removeImage(setRecipeImage, "recipeImageInput");
+                            }}
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+            </div>
 
             <div className="details1">
                 <div className="time">
