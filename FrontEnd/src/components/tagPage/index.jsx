@@ -55,7 +55,7 @@ export function TagPage() {
         >
           {recipes.length > 0 ? (
             recipes.map((recipe) => (
-              <Link key={recipe.id} to={`/recipes/${recipe.id}`}>
+              <Link key={recipe._id} to={`/recipes/${recipe._id}`}>
                 <RecipeBox
                   title={recipe.recipeName}
                   image={recipe.coverImage}

@@ -4,6 +4,12 @@ export function Footer() {
   return (
     <>
       <section id="footer">
+        {/* <div className="logo-end">
+          <Link to={"/"}>
+            <img src="/images/Logo1.png" className="le" alt="Logo" />
+          </Link>
+        </div> */}
+
         <div className="whole">
           <div className="left">
             <p className="p1">More about Recipe Realm</p>

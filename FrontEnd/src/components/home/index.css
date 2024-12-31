@@ -1,0 +1,122 @@
+/* General styles */
+.home-page {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Carousel Section */
+.carousel {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.carousel-container {
+  position: relative;
+  max-width: 94%;
+  height: 540px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.carousel-item h2 {
+  margin: 10px 0 5px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.carousel-item p {
+  font-size: 1em;
+  color: #555;
+}
+
+/* Trending Recipes Section */
+.trending-recipes {
+  margin-top: 40px;
+}
+
+.trending-recipes h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.recipes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+/* Tips Section */
+#articles {
+  margin-top: 50px;
+}
+
+.cat1 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.hold1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 320px;
+}
+
+.notes {
+  padding: 10px; /* Increased padding for a larger box */
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px; /* Rounded corners */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 400px;
+}
+
+.notes p {
+  font-size: 1.4em; /* Larger font for title */
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.notes ul {
+  margin-top: -20px;
+  padding-left: 20px;
+  font-size: 1.1em;
+}
+
+.notes ul li {
+  margin-bottom: 12px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .cat1 {
+    grid-template-columns: 1fr 1fr; /* Two columns on medium screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .cat1 {
+    grid-template-columns: 1fr; /* One column on small screens */
+  }
+
+  .notes p {
+    font-size: 1.2em; /* Slightly smaller font size for small screens */
+  }
+
+  .notes ul li {
+    font-size: 1em; /* Adjust the font size for better readability */
+  }
+}

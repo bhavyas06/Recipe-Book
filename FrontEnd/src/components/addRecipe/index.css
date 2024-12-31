@@ -56,6 +56,7 @@ h2 {
   }
 }
 
+/* Image Upload */
 .image-upload-container {
   display: flex;
   justify-content: space-between;
@@ -100,6 +101,7 @@ h2 {
   border-radius: 10px;
 }
 
+/* Details */
 .details1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -141,6 +143,7 @@ h2 {
 .time input:focus,
 .time textarea:focus {
   border-color: #75C2B1;
+  /* Highlight on focus */
   outline: none;
 }
 
@@ -161,6 +164,7 @@ h2 {
   }
 }
 
+/* Steps And Ingredients */
 .recipe-container {
   display: flex;
   flex-wrap: wrap;
@@ -276,12 +280,14 @@ button:focus {
   font-size: 18px;
   gap: 12px;
   color: #333;
+  /* Darker color for readability */
 }
 
 .tag-label input {
   margin-right: 8px;
 }
 
+/* Style the checkbox */
 .tag-label input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -294,11 +300,13 @@ button:focus {
   position: relative;
 }
 
+/* Change styles when checked */
 .tag-label input[type="checkbox"]:checked {
   background-color: #75C2B1;
   border-color: #45bca2;
 }
 
+/* Add a checkmark when checked */
 .tag-label input[type="checkbox"]:checked::after {
   content: "✔";
   position: absolute;
