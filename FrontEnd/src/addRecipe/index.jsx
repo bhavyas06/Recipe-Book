@@ -12,19 +12,8 @@ const AddRecipe = () => {
     const [cookTime, setCookTime] = useState("");
     const [servings, setServings] = useState("");
     const [description, setDescription] = useState("");
-
-    const [ingredients, setIngredients] = useState(
-        Array.from({ length: 5 }, (_, index) => ({
-            id: Date.now() + index,
-            value: "",
-        }))
-    );
-    const [steps, setSteps] = useState(
-        Array.from({ length: 5 }, (_, index) => ({
-            id: Date.now() + index + 5,
-            value: "",
-        }))
-    );
+    const [ingredients, setIngredients] = useState([""]);
+    const [steps, setSteps] = useState([""]);
     const [tags, setTags] = useState({
         breakfast: false,
         dinner: false,
@@ -38,6 +27,7 @@ const AddRecipe = () => {
 
     const [coverImage, setCoverImage] = useState(null);
     const [recipeImage, setRecipeImage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (isEdit && recipe) {
@@ -46,8 +36,18 @@ const AddRecipe = () => {
             setCookTime(recipe.cookTime || "");
             setServings(recipe.servings || "");
             setDescription(recipe.description || "");
-            setIngredients(recipe.ingredients || []);
-            setSteps(recipe.steps || []);
+            setIngredients(
+                recipe.ingredients.map((ingredient) => ({
+                    id: ingredient.id, // Keep the original ID
+                    value: ingredient.value, // Set the value correctly
+                }))
+            );
+            setSteps(
+                recipe.steps.map((step) => ({
+                    id: step.id, // Keep the original ID
+                    value: step.value, // Set the value correctly
+                }))
+            );
             setTags((prevTags) => {
                 const updatedTags = { ...prevTags };
                 recipe.tags.forEach((tag) => {
@@ -60,13 +60,6 @@ const AddRecipe = () => {
         }
     }, [isEdit, recipe]);
 
-    const removeImage = (setImage, inputId) => {
-        setImage(null);
-        const input = document.getElementById(inputId);
-        input.value = "";
-    };
-
-
     const handleImageChange = (e, setImage) => {
         const file = e.target.files[0];
         if (file) {
@@ -75,45 +68,33 @@ const AddRecipe = () => {
         }
     };
 
-    const handleAddIngredient = () =>
-        setIngredients([...ingredients, { id: Date.now(), value: "" }]);
+    const handleAddIngredient = () => setIngredients([...ingredients, ""]);
+    const handleAddStep = () => setSteps([...steps, ""]);
 
-    const handleAddStep = () =>
-        setSteps([...steps, { id: Date.now(), value: "" }]);
-
-    const handleIngredientChange = (id, value) => {
-        setIngredients((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, value } : item))
-        );
+    const handleIngredientChange = (index, value) => {
+        setIngredients((prev) => prev.map((item, i) => (i === index ? value : item)));
     };
 
-    const handleStepChange = (id, value) => {
-        setSteps((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, value } : item))
-        );
+    const handleStepChange = (index, value) => {
+        setSteps((prev) => prev.map((item, i) => (i === index ? value : item)));
     };
 
-    const handleRemoveIngredient = (id) =>
-        setIngredients((prev) => prev.filter((item) => item.id !== id));
+    const handleRemoveIngredient = (index) =>
+        setIngredients((prev) => prev.filter((_, i) => i !== index));
 
-    const handleRemoveStep = (id) =>
-        setSteps((prev) => prev.filter((item) => item.id !== id));
+    const handleRemoveStep = (index) =>
+        setSteps((prev) => prev.filter((_, i) => i !== index));
 
     const handleTagChange = (tag) => {
         setTags((prev) => ({ ...prev, [tag]: !prev[tag] }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-        console.log(loggedInUser);
-
+    const validateForm = () => {
         const selectedTags = Object.keys(tags).filter((tag) => tags[tag]);
-        const formattedIngredients = ingredients.filter(Boolean);
-        const formattedSteps = steps.filter(Boolean);
+        const filteredIngredients = ingredients.filter((item) => item.trim() !== "");
+        const filteredSteps = steps.filter((item) => item.trim() !== "");
 
         if (
-            !loggedInUser ||
             !recipeName ||
             !prepTime ||
             !cookTime ||
@@ -121,16 +102,32 @@ const AddRecipe = () => {
             !description ||
             !coverImage ||
             !recipeImage ||
-            !formattedIngredients.length ||
-            !formattedSteps.length ||
+            !filteredIngredients.length ||
+            !filteredSteps.length ||
             !selectedTags.length
         ) {
-            alert("Please fill out all fields, select tags, and upload images!");
+            setErrorMessage("Please fill out all fields, select tags, and upload images.");
+            return false;
+        }
+        return true;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const loggedInUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!loggedInUser) {
+            setErrorMessage("You must be logged in to add a recipe.");
             return;
         }
 
+        if (!validateForm()) return;
+
+        const selectedTags = Object.keys(tags).filter((tag) => tags[tag]);
+        const filteredIngredients = ingredients.filter((item) => item.trim() !== "");
+        const filteredSteps = steps.filter((item) => item.trim() !== "");
+
         const newRecipe = {
-            id: isEdit ? recipe.id : Date.now().toString(),
             user: loggedInUser.email,
             recipeName,
             prepTime,
@@ -139,15 +136,13 @@ const AddRecipe = () => {
             description,
             coverImage,
             recipeImage,
-            ingredients: formattedIngredients,
-            steps: formattedSteps,
+            ingredients: filteredIngredients,
+            steps: filteredSteps,
             tags: selectedTags,
         };
 
-        console.log(newRecipe);
-
         const url = isEdit
-            ? `http://localhost:8080/recipes/${recipe.id}`
+            ? `http://localhost:8080/recipes/${recipe._id}`
             : "http://localhost:8080/recipes";
 
         try {
@@ -162,12 +157,11 @@ const AddRecipe = () => {
             }
 
             alert(isEdit ? "Recipe updated successfully!" : "Recipe added successfully!");
-            if (isEdit)
-                navigate("/profile");
+            if (isEdit) navigate("/profile");
             resetForm();
         } catch (error) {
             console.error("Error:", error);
-            alert(error.message);
+            setErrorMessage(error.message);
         }
     };
 
@@ -177,8 +171,8 @@ const AddRecipe = () => {
         setCookTime("");
         setServings("");
         setDescription("");
-        setIngredients(Array(5).fill(""));
-        setSteps(Array(5).fill(""));
+        setIngredients([""]);
+        setSteps([""]);
         setTags({
             breakfast: false,
             dinner: false,
@@ -191,207 +185,216 @@ const AddRecipe = () => {
         });
         setCoverImage(null);
         setRecipeImage(null);
+        setErrorMessage("");
     };
 
-
-
     return (
-        <form className="add-recipe-form" onSubmit={handleSubmit} autoComplete="off">
-            <h2>{isEdit ? "Edit Recipe" : "Add Recipe"}</h2>
+        <>
+            <form className="add-recipe-form" onSubmit={handleSubmit} autoComplete="off">
+                <h2>{isEdit ? "Edit Recipe" : "Add Recipe"}</h2>
 
-            <div className="name">
-                <label htmlFor="recipe-name">
-                    <h3>Recipe Name:</h3>
-                </label>
-                <input
-                    type="text"
-                    id="recipe-name"
-                    value={recipeName || ""}
-                    onChange={(e) => setRecipeName(e.target.value)}
-                    placeholder="Enter Recipe Name"
-                />
-            </div>
-
-            <div className="image-upload-container">
-                <div className="image-upload">
-                    <label htmlFor="coverImageInput" className="upload-label">
-                        {coverImage ? (
-                            <img src={coverImage} alt="Cover" className="uploaded-image" />
-                        ) : (
-                            <span>Select Cover Image</span>
-                        )}
+                {/* Recipe Name */}
+                <div className="name">
+                    <label htmlFor="recipe-name">
+                        <h3>Recipe Name:</h3>
                     </label>
                     <input
-                        type="file"
-                        id="coverImageInput"
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, setCoverImage)}
-                        style={{ display: "none" }}
-                    />
-                    {coverImage && (
-                        <button
-                            type="button"
-                            className="remove-button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                removeImage(setCoverImage, "coverImageInput");
-                            }}
-                        >
-                            ✕
-                        </button>
-                    )}
-                </div>
-
-                <div className="image-upload">
-                    <label htmlFor="recipeImageInput" className="upload-label">
-                        {recipeImage ? (
-                            <img src={recipeImage} alt="Recipe" className="uploaded-image" />
-                        ) : (
-                            <span>Select Recipe Image</span>
-                        )}
-                    </label>
-                    <input
-                        type="file"
-                        id="recipeImageInput"
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, setRecipeImage)}
-                        style={{ display: "none" }}
-                    />
-                    {recipeImage && (
-                        <button
-                            type="button"
-                            className="remove-button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                removeImage(setRecipeImage, "recipeImageInput");
-                            }}
-                        >
-                            ✕
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div className="details1">
-                <div className="time">
-                    <label htmlFor="prep-time">Prep Time:</label>
-                    <input
                         type="text"
-                        id="prep-time"
-                        value={prepTime || ""}
-                        onChange={(e) => setPrepTime(e.target.value)}
-                        placeholder="Enter prep time"
+                        id="recipe-name"
+                        value={recipeName || ""}
+                        onChange={(e) => setRecipeName(e.target.value)}
+                        placeholder="Enter Recipe Name"
                     />
-                </div>
-                <div className="time">
-                    <label htmlFor="cook-time">Cook Time:</label>
-                    <input
-                        type="text"
-                        id="cook-time"
-                        value={cookTime || ""}
-                        onChange={(e) => setCookTime(e.target.value)}
-                        placeholder="Enter cook time"
-                    />
-                </div>
-                <div className="time">
-                    <label htmlFor="servings">Servings:</label>
-                    <input
-                        type="number"
-                        id="servings"
-                        value={servings || ""}
-                        onChange={(e) => setServings(e.target.value)}
-                        placeholder="Enter servings"
-                    />
-                </div>
-                <div className="time">
-                    <label htmlFor="description">Description:</label>
-                    <textarea
-                        id="description"
-                        value={description || ""}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Enter description"
-                    />
-                </div>
-            </div>
-
-            <div className="recipe-container">
-                <div className="ingredients">
-                    <h3>Ingredients</h3>
-                    {ingredients.map((ingredient) => (
-                        <div key={ingredient.id} className="input-group">
-                            <textarea
-                                value={ingredient.value}
-                                onChange={(e) => handleIngredientChange(ingredient.id, e.target.value)}
-                                placeholder="Enter an ingredient"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => handleRemoveIngredient(ingredient.id)}
-                            >
-                                Remove
-                            </button>
-                        </div>
-                    ))}
-                    <button
-                        type="button"
-                        onClick={handleAddIngredient}
-                        className="add-button"
-                        style={{ backgroundColor: "#75C2B1" }}
-                    >
-                        + Add Ingredient
-                    </button>
                 </div>
 
-                <div className="steps">
-                    <h3>Steps</h3>
-                    {steps.map((step) => (
-                        <div key={step.id} className="input-group">
-                            <textarea
-                                value={step.value}
-                                onChange={(e) => handleStepChange(step.id, e.target.value)}
-                                placeholder="Enter a step"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => handleRemoveStep(step.id)}
-                            >
-                                Remove
-                            </button>
-                        </div>
-                    ))}
-                    <button
-                        type="button"
-                        onClick={handleAddStep}
-                        className="add-button"
-                        style={{ backgroundColor: "#75C2B1" }}
-                    >
-                        + Add Step
-                    </button>
-                </div>
-            </div>
-
-            <div className="tags1">
-                <h3>Tags:</h3>
-                <div className="tag-label">
-                    {Object.keys(tags).map((tag) => (
-                        <label key={tag}>
-                            <input
-                                type="checkbox"
-                                checked={tags[tag]}
-                                onChange={() => handleTagChange(tag)}
-                            />
-                            {tag}
+                {/* Cover Image */}
+                <div className="image-upload-container">
+                    <div className="image-upload">
+                        <label htmlFor="coverImageInput" className="upload-label">
+                            {coverImage ? (
+                                <img src={coverImage} alt="Cover" className="uploaded-image" />
+                            ) : (
+                                <span>Select Cover Image</span>
+                            )}
                         </label>
-                    ))}
+                        <input
+                            type="file"
+                            id="coverImageInput"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, setCoverImage)}
+                            style={{ display: "none" }}
+                        />
+                        {coverImage && (
+                            <button
+                                type="button"
+                                className="remove-button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeImage(setCoverImage, "coverImageInput");
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Recipe Image */}
+                    <div className="image-upload">
+                        <label htmlFor="recipeImageInput" className="upload-label">
+                            {recipeImage ? (
+                                <img src={recipeImage} alt="Recipe" className="uploaded-image" />
+                            ) : (
+                                <span>Select Recipe Image</span>
+                            )}
+                        </label>
+                        <input
+                            type="file"
+                            id="recipeImageInput"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, setRecipeImage)} // Trigger image update
+                            style={{ display: "none" }}
+                        />
+                        {recipeImage && (
+                            <button
+                                type="button"
+                                className="remove-button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeImage(setRecipeImage, "recipeImageInput"); // Reset file input and image preview
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            <button type="submit" className="submit-button">
-                {isEdit ? "Save Recipe" : "Submit Recipe"}
-            </button>
-        </form >
+
+
+                <div className="details1">
+                    <div className="time">
+                        <label htmlFor="prep-time">Prep Time:</label>
+                        <input
+                            type="text"
+                            id="prep-time"
+                            value={prepTime || ""}
+                            onChange={(e) => setPrepTime(e.target.value)}
+                            placeholder="Enter prep time"
+                        />
+                    </div>
+                    <div className="time">
+                        <label htmlFor="cook-time">Cook Time:</label>
+                        <input
+                            type="text"
+                            id="cook-time"
+                            value={cookTime || ""}
+                            onChange={(e) => setCookTime(e.target.value)}
+                            placeholder="Enter cook time"
+                        />
+                    </div>
+                    <div className="time">
+                        <label htmlFor="servings">Servings:</label>
+                        <input
+                            type="number"
+                            id="servings"
+                            value={servings || ""}
+                            onChange={(e) => setServings(e.target.value)}
+                            placeholder="Enter servings"
+                        />
+                    </div>
+                    <div className="time">
+                        <label htmlFor="description">Description:</label>
+                        <textarea
+                            id="description"
+                            value={description || ""}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Enter description"
+                        />
+                    </div>
+                </div>
+
+                {/* Ingredients Section */}
+                <div className="recipe-container">
+                    <div className="ingredients">
+                        <h3>Ingredients</h3>
+                        {ingredients.map((ingredient) => (
+                            <div key={ingredient.id} className="input-group">
+                                <textarea
+                                    value={ingredient.value}
+                                    onChange={(e) => handleIngredientChange(ingredient.id, e.target.value)}
+                                    placeholder="Enter an ingredient"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveIngredient(ingredient.id)}
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddIngredient}
+                            className="add-button"
+                            style={{ backgroundColor: "#75C2B1" }}
+                        >
+                            + Add Ingredient
+                        </button>
+                    </div>
+
+                    {/* Steps Section */}
+                    <div className="steps">
+                        <h3>Steps</h3>
+                        {steps.map((step) => (
+                            <div key={step.id} className="input-group">
+                                <textarea
+                                    value={step.value}
+                                    onChange={(e) => handleStepChange(step.id, e.target.value)}
+                                    placeholder="Enter a step"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveStep(step.id)}
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddStep}
+                            className="add-button"
+                            style={{ backgroundColor: "#75C2B1" }}
+                        >
+                            + Add Step
+                        </button>
+                    </div>
+                </div>
+
+                {/* Tags Section */}
+                <div className="tags1">
+                    <h3>Tags:</h3>
+                    <div className="tag-label">
+                        {Object.keys(tags).map((tag) => (
+                            <label key={tag}>
+                                <input
+                                    type="checkbox"
+                                    checked={tags[tag]}
+                                    onChange={() => handleTagChange(tag)}
+                                />
+                                {tag}
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Submit Button */}
+                <button type="submit" className="submit-button">
+                    {isEdit ? "Save Recipe" : "Submit Recipe"}
+                </button>
+            </form >
+        </>
     );
-
 };
 
 export default AddRecipe;

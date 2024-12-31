@@ -5,19 +5,35 @@ import "./index.css";
 export function ProfilePage() {
   const [recipes, setRecipes] = useState([]);
   const navigate = useNavigate();
-  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  const loggedInUser = JSON.parse(localStorage.getItem("user"));
+
+  // If the user is not logged in, redirect to login page
+  if (!loggedInUser) {
+    navigate("/");
+    return null;
+  }
+
+  const authToken = loggedInUser.token;
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("email");
     localStorage.setItem("isLoggedIn", "false");
-    navigate("/");
+    navigate("/"); // Redirect to login page
+    window.location.reload();
   };
 
   useEffect(() => {
     const fetchUserRecipes = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/recipes/user/${loggedInUser.email}`
+          `http://localhost:8080/recipes/user/${loggedInUser.email}`,
+          {
+            headers: {
+              "auth-token": authToken,
+            },
+          }
         );
 
         if (!response.ok) {
@@ -32,7 +48,7 @@ export function ProfilePage() {
     };
 
     fetchUserRecipes();
-  }, [loggedInUser]);
+  }, [loggedInUser, authToken]);
 
   const handleEdit = (recipe) => {
     navigate("/addRecipe", { state: { recipe, isEdit: true } });
@@ -47,7 +63,10 @@ export function ProfilePage() {
       try {
         const response = await fetch(`http://localhost:8080/recipes/${recipeId}`, {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": authToken,
+          },
         });
 
         if (!response.ok) {
@@ -55,7 +74,9 @@ export function ProfilePage() {
         }
 
         alert("Recipe deleted successfully");
-        setRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
+        setRecipes((prevRecipes) =>
+          prevRecipes.filter((recipe) => recipe._id !== recipeId)
+        );
       } catch (error) {
         console.error("Error deleting recipe:", error);
         alert("Error deleting recipe");
@@ -76,9 +97,9 @@ export function ProfilePage() {
         ) : (
           recipes.map((recipe) => (
             <div
-              key={recipe.id}
+              key={recipe._id}
               className="recipe-card"
-              onClick={() => handleView(recipe.id)}
+              onClick={() => handleView(recipe._id)}
               style={{ cursor: "pointer" }}
             >
               <img
@@ -100,7 +121,7 @@ export function ProfilePage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(recipe.id);
+                      handleDelete(recipe._id);
                     }}
                   >
                     Delete
@@ -114,4 +135,3 @@ export function ProfilePage() {
     </div>
   );
 }
-
