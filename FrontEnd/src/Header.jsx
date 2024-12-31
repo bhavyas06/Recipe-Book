@@ -1,10 +1,40 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import './Header.css'
+import './Header.css';
 
-export function Header({ isLoggedIn, togglePopup}) {
+export function Header({ isLoggedIn, togglePopup }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
+
+  // Fetch recipes from backend
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/recipes`);  // Adjust API endpoint as needed
+        const data = await response.json();
+        setRecipes(data); 
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
+
+  useEffect(() => {
+    console.log(recipes);
+    if (searchTerm === '') {
+      setFilteredRecipes([]);
+    } else {
+      const results = recipes.filter(recipe =>
+        recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredRecipes(results);
+    }
+  }, [searchTerm, recipes]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,10 +44,14 @@ export function Header({ isLoggedIn, togglePopup}) {
     setIsSearch(!isSearch);
   };
 
+  const handleSearchInputChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) {
-        setIsMenuOpen(false);
+        setIsMenuOpen(false); 
       }
     };
 
@@ -35,12 +69,13 @@ export function Header({ isLoggedIn, togglePopup}) {
             </Link>
           </div>
 
-          {/* Hamburger Icon */}
           <div className="search-button1">
             <form id="searchForm1">
               <input
                 type="text"
                 id="searchInput"
+                value={searchTerm}
+                onChange={handleSearchInputChange}
                 placeholder="Search..."
                 className={`search-input ${isSearch ? "open1" : ""}`}
               />
@@ -56,6 +91,7 @@ export function Header({ isLoggedIn, togglePopup}) {
               </button>
             </form>
           </div>
+
           <div className="hamburger-icon" onClick={toggleMenu}>
             <div className={isMenuOpen ? "bar open" : "bar"}></div>
             <div className={isMenuOpen ? "bar open" : "bar"}></div>
@@ -78,6 +114,8 @@ export function Header({ isLoggedIn, togglePopup}) {
                   <input
                     type="text"
                     id="searchInput"
+                    value={searchTerm}
+                    onChange={handleSearchInputChange}
                     placeholder="Search..."
                     className="search-input"
                   />
@@ -85,21 +123,34 @@ export function Header({ isLoggedIn, togglePopup}) {
                     <i className="fa-solid fa-search"></i>
                   </button>
                 </form>
+                {/* Search results dropdown */}
+                {filteredRecipes.length > 0 && (
+                  <div className="searchResults">
+                    {filteredRecipes.map((recipe, index) => (
+                      <div key={index} className="searchItem">
+                        <Link to={recipe.link} onClick={() => setSearchTerm('')}>
+                          <img src={recipe.coverImage} alt={recipe.recipeName} width={50} />
+                          <span>{recipe.recipeName}</span>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </li>
 
               {isLoggedIn ? (
-          <>
-            <li>
-              <Link to="/profile">Profile</Link>
-            </li>
-          </>
-        ) : (
-          <li>
-            <a href="#" className="login-button" onClick={togglePopup}>
-              Login
-            </a>
-          </li>
-        )}
+                <>
+                  <li>
+                    <Link to="/profile">Profile</Link>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <a className="login-button" onClick={togglePopup}>
+                    Login
+                  </a>
+                </li>
+              )}
 
               <li onClick={() => isMenuOpen && toggleMenu()}>
                 <Link to="/addRecipe">Add Recipe</Link>
