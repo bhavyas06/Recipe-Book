@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "cross-env PORT=8080",
+    "start": "vite",
     "build": "vite build",  
+    "dev": "vite --port 8080",
     "eject": "echo 'Eject is not supported with Vite'",  
     "lint": "eslint --ext .js,.jsx ./src",
     "lint:fix": "eslint --fix --ext .js,.jsx ./src"
