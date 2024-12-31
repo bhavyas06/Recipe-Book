@@ -28,13 +28,12 @@ export function Layout() {
   const onLoginSuccess = () => {
     setIsLoggedIn(true); 
     localStorage.setItem("isLoggedIn", "true"); 
-    setLoginVisible(false);
+    setLoginVisible(false); 
   };
-
+  
   const handleLogout = () => {
     setIsLoggedIn(false); 
     localStorage.setItem("isLoggedIn", "false");
-    localStorage.removeItem("loggedInUser");
   };
 
   return (
