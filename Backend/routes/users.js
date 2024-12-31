@@ -1,56 +1,61 @@
 import express from "express";
-import fs from "fs";
+import UserModel from "../models/users.js";
+import { verifyToken } from "../utils/helpers.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", verifyToken, (req, res) => {
   console.log("The default response object is: ", res.statusCode);
-  let fileData = fs.readFileSync("./db.json", { encoding: "utf-8" });
-
-  const users = JSON.parse(fileData)?.users;
-  console.log("The user data is: ", users);
-  if (users && users.length > 0) {
-    res.send(users);
-  }
-  else {
-    res.status(204);
-    res.send();
-  }
+  UserModel.getUser(req, (dbRes) => {
+    if (dbRes) {
+      res.send(dbRes);
+    } else {
+      res.status(204);
+      res.send(dbRes);
+    }
+  },
+    (dbErr) => {
+      console.log(dbErr.name);
+      res.status(dbErr.status || 500);
+      res.send({ error: dbErr.message });
+    }
+  );
 });
 
 router.post("/", (req, res) => {
-  const user = req.body;
-  let db;
-  try {
-    db = fs.readFileSync("./db.json", { encoding: "utf-8" });
-  } catch (err) {
-    res.status(500);
-    return res.send({
-      message: "Problem connecting with database",
-      error: err
-    });
-  }
+  const { action, ...userData } = req.body;
 
-
-  let dbParsed = JSON.parse(db);
-  let currentUsers = dbParsed.users;
-  let updatedUsersList = [...currentUsers, user];
-  let updatedDbParsed = { ...dbParsed, users: updatedUsersList };
-  let updateDb = JSON.stringify(updatedDbParsed);
-
-  try {
-    fs.writeFileSync("./db.json", updateDb);
-    res.send({
-      message: "POST api success",
-      user: user
-    });
-  } catch (err) {
-    res.status(500);
-    res.send({
-      error: err,
-      message: "POST api failure"
-    });
+  if (action === "signUp") {
+    UserModel.addUser(
+      userData,
+      (dbRes) => {
+        res.status(201).send(dbRes);
+      },
+      (dbErr) => {
+        console.error(dbErr.name);
+        if (dbErr.name === "ValidationError") {
+          res.status(400);
+        } else {
+          res.status(500);
+        }
+        res.send({ error: dbErr.message });
+      }
+    );
+  } else if (action === "signIn") {
+    UserModel.signIn(
+      userData,
+      (dbRes) => {
+        res.status(200).send(dbRes);
+      },
+      (dbErr) => {
+        console.error(dbErr.name);
+        res.status(dbErr.status || 500).send({ error: dbErr.message });
+      }
+    );
+  } else {
+    res.status(400).send({ error: "Invalid action" });
   }
 });
+
 
 export default router;
