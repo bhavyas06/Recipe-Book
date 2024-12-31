@@ -10,29 +10,47 @@ export function SignUp({ togglePopup, toggleRegisterPopup }) {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showFailureAlert, setShowFailureAlert] = useState(false);
 
+  const validateInput = (name, phone, email, password) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[6-9]{1}[0-9]{9}$/;
+  
+    if (!name || !phone || !email || !password) {
+      return "All fields are required.";
+    }
+    if (!emailRegex.test(email)) {
+      return "Invalid email format.";
+    }
+    if (!phoneRegex.test(phone)) {
+      return "Phone number must be 10 digits.";
+    }
+    return null;
+  };
+
   const signUpHandler = async (event) => {
     event.preventDefault();
 
     // Collect form values
     const formValuesObject = {
+      action: "signUp",
       name: nameRef.current.value,
-      phone: phoneRef.current.value,
+      phoneNumber: phoneRef.current.value,
       email: emailRef.current.value,
       password: passwordRef.current.value,
     };
 
     console.log("The form values are: ", formValuesObject);
+    const error = validateInput(formValuesObject.name, formValuesObject.phoneNumber, formValuesObject.email, formValuesObject.password);
 
     if (
       formValuesObject.name &&
-      formValuesObject.phone &&
+      formValuesObject.phoneNumber &&
       formValuesObject.email &&
       formValuesObject.password
     ) {
       try {
         const response = await fetch("http://localhost:8080/users");
         const users = await response.json();
-        const userExists = users.some((user) => user.email === formValuesObject.email);
+        const userExists = Array.isArray(users) && users.some((user) => user.email === formValuesObject.email);
 
         if (userExists) {
           setShowFailureAlert(true);
