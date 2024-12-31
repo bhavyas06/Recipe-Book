@@ -21,23 +21,19 @@ router.get("/", (req, res) => {
   );
 });
 
+router.get("/random-recipes", async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 3; 
+    const recipes = await recipeModel.aggregate([{ $sample: { size: count } }]);
+    res.send(recipes);
+  } catch (error) {
+    console.error("Error fetching random recipes:", error);
+    res.status(500).send({ error: "Unable to fetch random recipes" });
+  }
+});
+
 router.get("/user/:email", (req, res) => {
   const userEmail = req.params.email;
-  // let fileData;
-
-  // try {
-  //   fileData = fs.readFileSync("./db.json", { encoding: "utf-8" });
-  //   const allRecipes = JSON.parse(fileData)?.recipes || [];
-  //   const userRecipes = allRecipes.filter(recipe => recipe.user === userEmail);
-
-  //   if (userRecipes.length > 0) {
-  //     res.status(200).send(userRecipes);
-  //   } else {
-  //     res.status(404).send({ message: "No recipes found for the user" });
-  //   }
-  // } catch (err) {
-  //   res.status(500).send({ error: "Failed to fetch recipes", message: err.message });
-  // }
 
   if (userEmail) {
     recipeModel.getRecipesByUser(userEmail, (dbRes) => {
@@ -59,23 +55,8 @@ router.get("/user/:email", (req, res) => {
 
 router.get("/:id", (req, res) => {
   const recipeId = req.params.id;
-  // let fileData;
 
-  // try {
-  //   fileData = fs.readFileSync("./db.json", { encoding: "utf-8" });
-  //   const recipes = JSON.parse(fileData)?.recipes || [];
-  //   const recipe = recipes.find(item => item.id === recipeId);
-
-  //   if (recipe) {
-  //     res.status(200).send(recipe);
-  //   } else {
-  //     res.status(404).send({ message: "Recipe not found" });
-  //   }
-  // } catch (err) {
-  //   res.status(500).send({ error: "Failed to fetch recipe", message: err.message });
-  // }
-
-  recipeModel.getRecipeById(id, (dbRes) => {
+  recipeModel.getRecipeById(recipeId, (dbRes) => {
     if (dbRes) {
       res.send(dbRes);
     } else {

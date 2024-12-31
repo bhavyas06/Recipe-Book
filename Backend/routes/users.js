@@ -22,6 +22,7 @@ router.get("/", verifyToken, (req, res) => {
   );
 });
 
+
 router.post("/", (req, res) => {
   const { action, ...userData } = req.body;
 
